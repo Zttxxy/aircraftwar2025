@@ -8,17 +8,17 @@ import java.awt.event.MouseEvent;
 /**
  * 英雄机控制类
  * 监听鼠标，控制英雄机的移动
- *
- * @author hitsz
  */
 public class HeroController {
     private Game game;
     private HeroAircraft heroAircraft;
     private MouseAdapter mouseAdapter;
 
-    public HeroController(Game game, HeroAircraft heroAircraft){
+    // [MODIFIED] 仅传入 Game，heroAircraft 从单例中获取
+    public HeroController(Game game){
         this.game = game;
-        this.heroAircraft = heroAircraft;
+        // 直接获取已经在 Game 构造中初始化过的单例
+        this.heroAircraft = HeroAircraft.getInstance();
 
         mouseAdapter = new MouseAdapter() {
             @Override
@@ -37,6 +37,4 @@ public class HeroController {
         game.addMouseListener(mouseAdapter);
         game.addMouseMotionListener(mouseAdapter);
     }
-
-
 }

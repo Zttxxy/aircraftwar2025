@@ -7,42 +7,58 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
- * 英雄飞机，游戏玩家操控
- * @author hitsz
+ * 英雄飞机（单例）
  */
 public class HeroAircraft extends AbstractAircraft {
 
-    /**攻击方式 */
+    // ---------------- 单例相关 ----------------
+    private volatile static HeroAircraft instance = null;
 
     /**
-     * 子弹一次发射数量
+     * 私有构造函数，外部不可 new
      */
-    private int shootNum = 1;
-
-    /**
-     * 子弹伤害
-     */
-    private int power = 30;
-
-    /**
-     * 子弹射击方向 (向上发射：-1，向下发射：1)
-     */
-    private int direction = -1;
-
-    /**
-     * @param locationX 英雄机位置x坐标
-     * @param locationY 英雄机位置y坐标
-     * @param speedX 英雄机射出的子弹的基准速度（英雄机无特定速度）
-     * @param speedY 英雄机射出的子弹的基准速度（英雄机无特定速度）
-     * @param hp    初始生命值
-     */
-    public HeroAircraft(int locationX, int locationY, int speedX, int speedY, int hp) {
+    private HeroAircraft(int locationX, int locationY, int speedX, int speedY, int hp) {
         super(locationX, locationY, speedX, speedY, hp);
     }
 
+    /**
+     * 带参数的 getInstance：首次调用时创建对象（线程安全，DCL）
+     */
+    public static HeroAircraft getInstance(int locationX, int locationY, int speedX, int speedY, int hp) {
+        if (instance == null) {
+            synchronized (HeroAircraft.class) {
+                if (instance == null) {
+                    instance = new HeroAircraft(locationX, locationY, speedX, speedY, hp);
+                }
+            }
+        }
+        return instance;
+    }
+
+    /**
+     * 无参 getInstance：获取已创建好的单例（若未初始化则抛异常）
+     * 方便其它类在没有参数时直接访问
+     */
+    public static HeroAircraft getInstance() {
+        if (instance == null) {
+            throw new IllegalStateException("HeroAircraft not initialized. Call getInstance(x,y,speedX,speedY,hp) first.");
+        }
+        return instance;
+    }
+
+    // ---------------- 英雄机功能属性 ----------------
+    /** 子弹一次发射数量 */
+    private int shootNum = 1;
+
+    /** 子弹伤害 */
+    private int power = 30;
+
+    /** 子弹射击方向 (向上发射：-1，向下发射：1) */
+    private int direction = -1;
+
     @Override
     public void forward() {
-        // 英雄机由鼠标控制，不通过forward函数移动
+        // 英雄机由鼠标控制，不通过 forward() 移动
     }
 
     @Override
@@ -53,19 +69,18 @@ public class HeroAircraft extends AbstractAircraft {
     public List<BaseBullet> shoot() {
         List<BaseBullet> res = new LinkedList<>();
         int x = this.getLocationX();
-        int y = this.getLocationY() + direction*2;
+        int y = this.getLocationY() + direction * 2;
         int speedX = 0;
-        int speedY = this.getSpeedY() + direction*5;
+        int speedY = this.getSpeedY() + direction * 5;
         BaseBullet bullet;
-        for(int i=0; i<shootNum; i++){
-            // 子弹发射位置相对飞机位置向前偏移
-            // 多个子弹横向分散
-            bullet = new HeroBullet(x + (i*2 - shootNum + 1)*10, y, speedX, speedY, power);
+        for (int i = 0; i < shootNum; i++) {
+            bullet = new HeroBullet(x + (i * 2 - shootNum + 1) * 10, y, speedX, speedY, power);
             res.add(bullet);
         }
         return res;
     }
-    //新增一个 setHp 和 getMaxHp 方法，方便道具加血时调用
+
+    // 道具/外部修改生命值的接口
     public void setHp(int hp) {
         this.hp = hp;
     }
@@ -73,6 +88,4 @@ public class HeroAircraft extends AbstractAircraft {
     public int getMaxHp() {
         return maxHp;
     }
-
-
 }
