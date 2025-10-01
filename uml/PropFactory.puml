@@ -1,0 +1,53 @@
+@startuml
+'https://plantuml.com/class-diagram
+
+interface PropFactory {
+    + {abstract} createProp(int x, int y):AbstractProp
+}
+
+abstract class AbstractProp {
+    + {abstract} AbstractProp(int locationX, int locationY, int speedX, int speedY)
+    + {abstract} active(HeroAircraft heroAircraft)
+}
+
+class BloodPropFactory {
+    + createProp(int x, int y):AbstractProp
+}
+
+class BombPropFactory {
+    + createProp(int x, int y):AbstractProp
+}
+
+class FirePropFactory {
+    + createProp(int x, int y):AbstractProp
+}
+
+class BloodProp {
+    + BloodProp(int locationX, int locationY, int speedX, int speedY)
+    + active(HeroAircraft heroAircraft)
+}
+
+class BombProp {
+    + BombProp(int locationX, int locationY, int speedX, int speedY)
+    + active(HeroAircraft heroAircraft)
+}
+
+class FireProp {
+    + FireProp(int locationX, int locationY, int speedX, int speedY)
+    + active(HeroAircraft heroAircraft)
+}
+
+PropFactory <|.. BloodPropFactory
+PropFactory <|.. BombPropFactory
+PropFactory <|.. FirePropFactory
+
+PropFactory ..> AbstractProp
+BloodPropFactory ..> BloodProp
+BombPropFactory ..> BombProp
+FirePropFactory ..> FireProp
+
+AbstractProp <|.. BloodProp
+AbstractProp <|.. BombProp
+AbstractProp <|.. FireProp
+
+@enduml

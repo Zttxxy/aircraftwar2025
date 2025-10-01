@@ -1,0 +1,31 @@
+@startuml
+'https://plantuml.com/class-diagram
+
+class HeroAircraft {
+    - {static} instance: HeroAircraft
+    - locationX: int
+    - locationY: int
+    - speedX: int
+    - speedY: int
+    - hp: int
+    - maxHp: int
+    - shootNum: int
+    - power: int
+    - direction: int
+    - isFiring: boolean
+    - isFiringPlus: boolean
+
+    + HeroAircraft(locationX:int, locationY:int, speedX:int, speedY:int, hp:int)
+    + {static} getInstance(locationX:int, locationY:int, speedX:int, speedY:int, hp:int): HeroAircraft
+    + forward(): void
+    + shoot(): List<BaseBullet>
+    + setHp(hp:int): void
+    + getMaxHp(): int
+    + setFiring(): boolean
+    + closeFiring(): boolean
+    + setFiringPlus(): boolean
+    + closeFiringPlus(): boolean
+    + getDirection(): int
+}
+
+@enduml

@@ -1,0 +1,47 @@
+@startuml
+'https://plantuml.com/class-diagram
+
+interface EnemyFactory {
+    + {abstract} createEnemy(int locationX, int locationY, int speedX, int speedY):Enemy
+}
+
+abstract class Enemy {
+    + {abstract} Enemy(int locationX, int locationY, int speedX, int speedY, int hp)
+}
+
+class MobEnemyFactory {
+    + createEnemy(int locationX, int locationY, int speedX, int speedY):Enemy
+}
+
+class EliteEnemyFactory {
+    + createEnemy(int locationX, int locationY, int speedX, int speedY):Enemy
+}
+
+class MobEnemy {
+    + MobEnemy(int locationX, int locationY, int speedX, int speedY, int hp)
+    + shoot():List<BaseBullet>
+    + update():int
+}
+
+class EliteEnemy {
+    - power:int
+    - direction:int
+
+    + EliteEnemy(int locationX, int locationY, int speedX, int speedY, int hp)
+    + getDirection():int
+    + shoot():List<BaseBullet>
+    + update():int
+}
+
+EnemyFactory ..> Enemy
+
+EnemyFactory <|.. MobEnemyFactory
+EnemyFactory <|.. EliteEnemyFactory
+
+MobEnemyFactory ..> MobEnemy
+EliteEnemyFactory ..> EliteEnemy
+
+Enemy <|.. MobEnemy
+Enemy <|.. EliteEnemy
+
+@enduml
