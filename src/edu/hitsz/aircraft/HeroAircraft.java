@@ -14,11 +14,25 @@ public class HeroAircraft extends AbstractAircraft {
     // ---------------- 单例相关 ----------------
     private volatile static HeroAircraft instance = null;
 
+    // ---------------- 英雄机功能属性 ----------------
+    /** 最大血量 */
+    private final int maxHp;
+
+    /** 子弹一次发射数量 */
+    private int shootNum = 1;
+
+    /** 子弹伤害 */
+    private int power = 30;
+
+    /** 子弹射击方向 (向上发射：-1，向下发射：1) */
+    private int direction = -1;
+
     /**
      * 私有构造函数，外部不可 new
      */
     private HeroAircraft(int locationX, int locationY, int speedX, int speedY, int hp) {
         super(locationX, locationY, speedX, speedY, hp);
+        this.maxHp = hp; // 初始化最大血量
     }
 
     /**
@@ -37,7 +51,6 @@ public class HeroAircraft extends AbstractAircraft {
 
     /**
      * 无参 getInstance：获取已创建好的单例（若未初始化则抛异常）
-     * 方便其它类在没有参数时直接访问
      */
     public static HeroAircraft getInstance() {
         if (instance == null) {
@@ -46,19 +59,8 @@ public class HeroAircraft extends AbstractAircraft {
         return instance;
     }
 
-    // ---------------- 英雄机功能属性 ----------------
-    /** 子弹一次发射数量 */
-    private int shootNum = 1;
-
-    /** 子弹伤害 */
-    private int power = 30;
-
-    /** 子弹射击方向 (向上发射：-1，向下发射：1) */
-    private int direction = -1;
-
     @Override
     public void forward() {
-        // 英雄机由鼠标控制，不通过 forward() 移动
     }
 
     @Override
