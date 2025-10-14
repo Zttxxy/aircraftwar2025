@@ -86,7 +86,7 @@ public class Game extends JPanel {
                 }
 
                 // ------------------- 敌机生成 -------------------
-                int initialEnemyNumber = 2; // 刚开始生成敌机数量
+                int initialEnemyNumber = 2; // 开局生成敌机数量
                 while (enemyAircrafts.size() < Math.min(enemyMaxNumber, initialEnemyNumber)) {
                     addRandomEnemy();
                 }
@@ -106,7 +106,7 @@ public class Game extends JPanel {
                 shootAction();
             }
 
-            // 每帧都执行的事件
+            // 每帧事件
             bulletsMoveAction();
             aircraftsMoveAction();
             propsMoveAction();
@@ -130,11 +130,10 @@ public class Game extends JPanel {
             }
         };
 
-        // 每40ms执行一次循环
         executorService.scheduleWithFixedDelay(task, timeInterval, timeInterval, TimeUnit.MILLISECONDS);
     }
 
-    // ------------------- 辅助方法 -------------------
+    // ------------------- 敌机生成辅助方法 -------------------
     private void addRandomEnemy() {
         addRandomEnemy(new MobEnemyFactory());
     }
@@ -146,8 +145,12 @@ public class Game extends JPanel {
         }
 
         int x = getNonOverlappingX(enemyWidth);
-        int y = 20 + (int)(Math.random() * 30); // 顶部留一些间距
-        enemyAircrafts.add(factory.createEnemy(x, y, 3, 5, 30));
+        int y = 20 + (int)(Math.random() * 50); // 顶部留一定间距，纵向随机
+        int speedX = (int)(Math.random() * 3) - 1; // 水平速度随机：-1,0,1
+        int speedY = 3 + (int)(Math.random() * 3); // 纵向速度随机：3~5
+
+        enemyAircrafts.add(factory.createEnemy(x, y, speedX, speedY, factory instanceof MobEnemyFactory ? 30 :
+                factory instanceof EliteEnemyFactory ? 80 : 150));
     }
 
     // 避免水平重叠
@@ -168,6 +171,7 @@ public class Game extends JPanel {
         } while (overlap && attempts < 10);
         return x;
     }
+
 
 
 
