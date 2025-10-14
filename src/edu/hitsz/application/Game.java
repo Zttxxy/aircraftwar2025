@@ -3,6 +3,9 @@ package edu.hitsz.application;
 import edu.hitsz.aircraft.*;
 import edu.hitsz.bullet.BaseBullet;
 import edu.hitsz.basic.AbstractFlyingObject;
+import edu.hitsz.dao.Player;
+import edu.hitsz.dao.PlayerDao;
+import edu.hitsz.dao.PlayerDaoImpl;
 import edu.hitsz.factory.*;
 import edu.hitsz.prop.AbstractProp;
 import edu.hitsz.prop.BloodProp;
@@ -33,7 +36,7 @@ public class Game extends JPanel {
     private final List<BaseBullet> heroBullets;
     private final List<BaseBullet> enemyBullets;
 
-    private int enemyMaxNumber = 5;
+    private int enemyMaxNumber = 3;
     private int score = 0;
     private int time = 0;
     private int cycleDuration = 600;
@@ -49,7 +52,7 @@ public class Game extends JPanel {
         heroAircraft = HeroAircraft.getInstance(
                 Main.WINDOW_WIDTH / 2,
                 Main.WINDOW_HEIGHT - ImageManager.HERO_IMAGE.getHeight(),
-                0, 0, 100000);
+                0, 0, 1000);
 
         enemyAircrafts = new LinkedList<>();
         heroBullets = new LinkedList<>();
@@ -72,7 +75,6 @@ public class Game extends JPanel {
                 // Boss 出现条件：分数达到阈值 & 当前没有Boss
                 boolean bossExists = enemyAircrafts.stream().anyMatch(e -> e instanceof BossEnemy);
                 if (score >= nextBossScore && !bossExists) {
-                    // 生成 Boss
                     EnemyFactory bossFactory = new BossEnemyFactory();
                     enemyAircrafts.add(bossFactory.createEnemy(
                             Main.WINDOW_WIDTH / 2,
@@ -80,45 +82,23 @@ public class Game extends JPanel {
                             2, 0, 500
                     ));
                     System.out.println("Boss 出现！");
-                    // 更新下一次Boss的触发分数
                     nextBossScore += bossThreshold;
                 }
 
-                // 普通敌机生成逻辑
-                // 1. 保证场上至少有 1 个敌机
-                if (enemyAircrafts.isEmpty()) {
-                    EnemyFactory mobFactory = new MobEnemyFactory();
-                    enemyAircrafts.add(mobFactory.createEnemy(
-                            (int) (Math.random() * (Main.WINDOW_WIDTH - ImageManager.MOB_ENEMY_IMAGE.getWidth())),
-                            (int) (Math.random() * Main.WINDOW_HEIGHT * 0.05),
-                            3, 5, 30
-                    ));
+                // ------------------- 敌机生成 -------------------
+                int initialEnemyNumber = 2; // 刚开始生成敌机数量
+                while (enemyAircrafts.size() < Math.min(enemyMaxNumber, initialEnemyNumber)) {
+                    addRandomEnemy();
                 }
 
-                // 2. 补充敌机直到达到上限
                 while (enemyAircrafts.size() < enemyMaxNumber) {
                     double rand = Math.random();
                     if (rand < 0.6) { // 普通敌机
-                        EnemyFactory mobFactory = new MobEnemyFactory();
-                        enemyAircrafts.add(mobFactory.createEnemy(
-                                (int) (Math.random() * (Main.WINDOW_WIDTH - ImageManager.MOB_ENEMY_IMAGE.getWidth())),
-                                (int) (Math.random() * Main.WINDOW_HEIGHT * 0.05),
-                                3, 5, 30
-                        ));
+                        addRandomEnemy();
                     } else if (rand < 0.85) { // 精英敌机
-                        EnemyFactory eliteFactory = new EliteEnemyFactory();
-                        enemyAircrafts.add(eliteFactory.createEnemy(
-                                (int) (Math.random() * (Main.WINDOW_WIDTH - ImageManager.ELITE_ENEMY_IMAGE.getWidth())),
-                                (int) (Math.random() * Main.WINDOW_HEIGHT * 0.05),
-                                3, 4, 80
-                        ));
-                    } else { // 超级精英敌机 (你的ElitePlus)
-                        EnemyFactory elitePlusFactory = new ElitePlusFactory();
-                        enemyAircrafts.add(elitePlusFactory.createEnemy(
-                                (int) (Math.random() * (Main.WINDOW_WIDTH - ImageManager.ELITE_ENEMY_IMAGE.getWidth())),
-                                (int) (Math.random() * Main.WINDOW_HEIGHT * 0.05),
-                                3, 3, 150
-                        ));
+                        addRandomEnemy(new EliteEnemyFactory());
+                    } else { // 超级精英
+                        addRandomEnemy(new ElitePlusFactory());
                     }
                 }
 
@@ -127,24 +107,69 @@ public class Game extends JPanel {
             }
 
             // 每帧都执行的事件
-            bulletsMoveAction();    // 子弹移动
-            aircraftsMoveAction();  // 飞机和道具移动
-            propsMoveAction();      // 道具移动
-            crashCheckAction();     // 碰撞检测
-            postProcessAction();    // 删除无效对象
-            repaint();              // 重绘界面
+            bulletsMoveAction();
+            aircraftsMoveAction();
+            propsMoveAction();
+            crashCheckAction();
+            postProcessAction();
+            repaint();
 
             // 游戏结束检查
             if (heroAircraft.getHp() <= 0) {
                 executorService.shutdown();
                 gameOverFlag = true;
                 System.out.println("Game Over!");
+
+                // ---------------- 游戏结束时记录并输出排行榜 ----------------
+                int finalScore = score;
+                PlayerDaoImpl dao = new PlayerDaoImpl();
+                dao.addPlayer(new Player("Player1", finalScore, PlayerDaoImpl.currentTime()));
+                dao.sortPlayersByScore();
+                dao.printRanking();
+                dao.saveToFile("ranking.txt");
             }
         };
 
         // 每40ms执行一次循环
         executorService.scheduleWithFixedDelay(task, timeInterval, timeInterval, TimeUnit.MILLISECONDS);
     }
+
+    // ------------------- 辅助方法 -------------------
+    private void addRandomEnemy() {
+        addRandomEnemy(new MobEnemyFactory());
+    }
+
+    private void addRandomEnemy(EnemyFactory factory) {
+        int enemyWidth = ImageManager.MOB_ENEMY_IMAGE.getWidth();
+        if (factory instanceof EliteEnemyFactory || factory instanceof ElitePlusFactory) {
+            enemyWidth = ImageManager.ELITE_ENEMY_IMAGE.getWidth();
+        }
+
+        int x = getNonOverlappingX(enemyWidth);
+        int y = 20 + (int)(Math.random() * 30); // 顶部留一些间距
+        enemyAircrafts.add(factory.createEnemy(x, y, 3, 5, 30));
+    }
+
+    // 避免水平重叠
+    private int getNonOverlappingX(int enemyWidth) {
+        int x;
+        boolean overlap;
+        int attempts = 0;
+        do {
+            x = (int) (Math.random() * (Main.WINDOW_WIDTH - enemyWidth));
+            overlap = false;
+            for (AbstractAircraft enemy : enemyAircrafts) {
+                if (Math.abs(enemy.getLocationX() - x) < enemyWidth + 10) { // 10像素间隔
+                    overlap = true;
+                    break;
+                }
+            }
+            attempts++;
+        } while (overlap && attempts < 10);
+        return x;
+    }
+
+
 
     private boolean timeCountAndNewCycleJudge() {
         cycleTime += timeInterval;

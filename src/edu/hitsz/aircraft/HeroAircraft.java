@@ -30,6 +30,11 @@ public class HeroAircraft extends AbstractAircraft {
     /** 射击策略 */
     private ShootStrategy shootStrategy = new NormalFireStrategy(); // 默认普通火力
 
+
+    /** 新增分数属性 */
+    private int score = 0;
+
+
     /**
      * 私有构造函数，外部不可 new
      */
@@ -75,6 +80,18 @@ public class HeroAircraft extends AbstractAircraft {
     public List<BaseBullet> shoot() {
         return shootStrategy.shoot(this);
     }
+
+
+    // ---------------- score 相关 ----------------
+    public int getScore() {
+        return score;
+    }
+
+    public void setScore(int score) {
+        this.score = score;
+    }
+
+
 
     // ---------------- 道具或外部接口 ----------------
     public void setHp(int hp) {

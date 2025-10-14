@@ -1,0 +1,40 @@
+@startuml
+' DAO 模式示例
+
+class Player{
+    - playerId:int
+    - playerName:String
+    - score:int
+    - playTime:String
+
+    + Player(int playerId, String playerName,int score,String playTime)
+    + getPlayerId():int
+    + setPlayerId(int playerId):void
+    + getPlayerName():String
+    + getScore():int
+    + getPlayTime():String
+    + toString():String
+}
+
+interface PlayerDao{
+    + getAllPlayers():List<Player>
+    + addPlayer(Player player):void
+    + deletePlayer(int playerId):void
+}
+
+class PlayerDaoImpl{
+    - players:List<Player>
+    + PlayerDaoImpl()
+    + getAllPlayers():List<Player>
+    + addPlayer(Player player):void
+    + deletePlayer(int playerId):void
+    + sortByScore():List<Player>
+    - saveToFile(String filePath):void
+    - loadFromFile(String filePath):void
+    - getCurrentTime():String
+    - printScores():void
+}
+
+PlayerDaoImpl .up.|> PlayerDao
+PlayerDaoImpl *-- Player
+@enduml

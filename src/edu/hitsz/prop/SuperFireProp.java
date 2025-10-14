@@ -25,21 +25,21 @@ public class SuperFireProp extends AbstractProp {
         heroAircraft.setShootStrategy(new SuperFireStrategy());
         vanish();
 
-        // 保存原始属性
-        int originalShootNum = heroAircraft.getShootNum();
-        int originalPower = heroAircraft.getPower();
-
-        // 设置超级火力
-        heroAircraft.setShootNum(originalShootNum * 3);
-        heroAircraft.setPower(originalPower * 2);
-
-        // 创建定时器，到期恢复原来的属性
-        ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
-        executor.schedule(() -> {
-            heroAircraft.setShootNum(originalShootNum);
-            heroAircraft.setPower(originalPower);
-            executor.shutdown();
-        }, SUPER_FIRE_DURATION, TimeUnit.MILLISECONDS);
+//        // 保存原始属性
+//        int originalShootNum = heroAircraft.getShootNum();
+//        int originalPower = heroAircraft.getPower();
+//
+//        // 设置超级火力
+//        heroAircraft.setShootNum(originalShootNum * 3);
+//        heroAircraft.setPower(originalPower * 2);
+//
+//        // 创建定时器，到期恢复原来的属性
+//        ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
+//        executor.schedule(() -> {
+//            heroAircraft.setShootNum(originalShootNum);
+//            heroAircraft.setPower(originalPower);
+//            executor.shutdown();
+//        }, SUPER_FIRE_DURATION, TimeUnit.MILLISECONDS);
     }
 
     @Override
