@@ -1,13 +1,13 @@
 package edu.hitsz.aircraft;
 
 import edu.hitsz.bullet.BaseBullet;
-import edu.hitsz.bullet.HeroBullet;
+import edu.hitsz.strategy.ShootStrategy;
+import edu.hitsz.strategy.NormalFireStrategy;
 
-import java.util.LinkedList;
 import java.util.List;
 
 /**
- * 英雄飞机（单例）
+ * 英雄飞机（单例 + 策略模式）
  */
 public class HeroAircraft extends AbstractAircraft {
 
@@ -26,6 +26,9 @@ public class HeroAircraft extends AbstractAircraft {
 
     /** 子弹射击方向 (向上发射：-1，向下发射：1) */
     private int direction = -1;
+
+    /** 射击策略 */
+    private ShootStrategy shootStrategy = new NormalFireStrategy(); // 默认普通火力
 
     /**
      * 私有构造函数，外部不可 new
@@ -61,33 +64,56 @@ public class HeroAircraft extends AbstractAircraft {
 
     @Override
     public void forward() {
+        // 英雄机前进逻辑，如果需要可添加
     }
 
-    @Override
     /**
-     * 通过射击产生子弹
-     * @return 射击出的子弹List
+     * 英雄机射击，使用当前射击策略
+     * @return 射击出的子弹列表
      */
+    @Override
     public List<BaseBullet> shoot() {
-        List<BaseBullet> res = new LinkedList<>();
-        int x = this.getLocationX();
-        int y = this.getLocationY() + direction * 2;
-        int speedX = 0;
-        int speedY = this.getSpeedY() + direction * 10;
-        BaseBullet bullet;
-        for (int i = 0; i < shootNum; i++) {
-            bullet = new HeroBullet(x + (i * 2 - shootNum + 1) * 10, y, speedX, speedY, power);
-            res.add(bullet);
-        }
-        return res;
+        return shootStrategy.shoot(this);
     }
 
-    // 道具/外部修改生命值的接口
+    // ---------------- 道具或外部接口 ----------------
     public void setHp(int hp) {
         this.hp = hp;
     }
 
     public int getMaxHp() {
         return maxHp;
+    }
+
+    public int getShootNum() {
+        return shootNum;
+    }
+
+    public void setShootNum(int shootNum) {
+        this.shootNum = shootNum;
+    }
+
+    public int getPower() {
+        return power;
+    }
+
+    public void setPower(int power) {
+        this.power = power;
+    }
+
+    public int getDirection() {
+        return direction;
+    }
+
+    public void setDirection(int direction) {
+        this.direction = direction;
+    }
+
+    public ShootStrategy getShootStrategy() {
+        return shootStrategy;
+    }
+
+    public void setShootStrategy(ShootStrategy shootStrategy) {
+        this.shootStrategy = shootStrategy;
     }
 }

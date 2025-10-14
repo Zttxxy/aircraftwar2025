@@ -7,6 +7,7 @@ import edu.hitsz.bullet.HeroBullet;
 import edu.hitsz.prop.BloodProp;
 import edu.hitsz.prop.BombProp;
 import edu.hitsz.prop.FireProp;
+import edu.hitsz.prop.SuperFireProp;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -40,6 +41,8 @@ public class ImageManager {
     public static BufferedImage ELITE_ENEMY_IMAGE;
     public static BufferedImage ELITE_PLUS_IMAGE;
     public static BufferedImage BOSS_IMAGE;
+    public static BufferedImage SUPER_FIRE_PROP_IMAGE;
+
 
 
     static {
@@ -57,7 +60,7 @@ public class ImageManager {
             ELITE_ENEMY_IMAGE = ImageIO.read(new FileInputStream("src/images/elite.png"));
             ELITE_PLUS_IMAGE = ImageIO.read(new FileInputStream("src/images/elitePlus.png"));
             BOSS_IMAGE = ImageIO.read(new FileInputStream("src/images/boss.png"));
-
+            SUPER_FIRE_PROP_IMAGE =  ImageIO.read(new FileInputStream("src/images/prop_bulletPlus.png"));
 
             CLASSNAME_IMAGE_MAP.put(HeroAircraft.class.getName(), HERO_IMAGE);
             CLASSNAME_IMAGE_MAP.put(MobEnemy.class.getName(), MOB_ENEMY_IMAGE);
@@ -70,6 +73,9 @@ public class ImageManager {
             //新增boss和精英敌机类
             CLASSNAME_IMAGE_MAP.put(ElitePlus.class.getName(), ELITE_PLUS_IMAGE);
             CLASSNAME_IMAGE_MAP.put(BossEnemy.class.getName(), BOSS_IMAGE);
+            //新增超级火力道具
+            CLASSNAME_IMAGE_MAP.put(SuperFireProp.class.getName(), SUPER_FIRE_PROP_IMAGE);
+
 
         } catch (IOException e) {
             e.printStackTrace();

@@ -215,7 +215,26 @@ public class Game extends JPanel {
 
                         // 掉落道具
                         if (maxDrop > 0) {
-                            dropProp(enemyAircraft.getLocationX(), enemyAircraft.getLocationY(), maxDrop);
+                            double dropChance = Math.random();
+                            PropFactory factory = null;
+                            if (dropChance < 0.3) {
+                                factory = new BloodPropFactory();
+                            } else if (dropChance < 0.6) {
+                                factory = new BombPropFactory();
+                            } else if (dropChance < 0.85) {
+                                factory = new FirePropFactory();
+                            } else {
+                                factory = new SuperFirePropFactory(); // 超级火力道具
+                            }
+
+                            if (factory != null) {
+                                props.add(factory.createProp(
+                                        enemyAircraft.getLocationX(),
+                                        enemyAircraft.getLocationY(),
+                                        0,
+                                        5
+                                ));
+                            }
                         }
                     }
                 }
@@ -290,7 +309,8 @@ public class Game extends JPanel {
         List<PropFactory> propFactories = Arrays.asList(
                 new BloodPropFactory(),
                 new BombPropFactory(),
-                new FirePropFactory()
+                new FirePropFactory(),
+                new SuperFirePropFactory()
         );
         for (int i = 0; i < dropNum; i++) {
             int index = (int)(Math.random() * propFactories.size());

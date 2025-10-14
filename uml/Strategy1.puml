@@ -1,0 +1,69 @@
+@startuml
+' https://plantuml.com/class-diagram
+
+title 策略模式在飞机大战中的应用（子弹发射策略）
+
+interface ShootStrategy {
+    + executeShoot(aircraft: AbstractAircraft): List<BaseBullet>
+}
+
+class StraightShootStrategy {
+    + executeShoot(aircraft: AbstractAircraft): List<BaseBullet>
+}
+
+class ScatterShootStrategy {
+    + executeShoot(aircraft: AbstractAircraft): List<BaseBullet>
+}
+
+class CircleShootStrategy {
+    + executeShoot(aircraft: AbstractAircraft): List<BaseBullet>
+}
+
+abstract class AbstractAircraft {
+    - shootStrategy: ShootStrategy
+    + setShootStrategy(shootStrategy: ShootStrategy): void
+    + shoot(): List<BaseBullet>
+}
+
+class HeroAircraft {
+    + shoot(): List<BaseBullet>
+}
+
+class EnemyAircraft {
+    + shoot(): List<BaseBullet>
+}
+
+class BaseBullet {
+    - x: int
+    - y: int
+    - speedX: int
+    - speedY: int
+    - power: int
+}
+
+' 关系
+ShootStrategy <|.. StraightShootStrategy
+ShootStrategy <|.. ScatterShootStrategy
+ShootStrategy <|.. CircleShootStrategy
+
+AbstractAircraft o--> ShootStrategy
+HeroAircraft --|> AbstractAircraft
+EnemyAircraft --|> AbstractAircraft
+
+note top of AbstractAircraft
+  Context角色：
+  通过组合策略对象来决定射击行为，
+  不同策略可在运行时动态替换。
+end note
+
+note bottom of ShootStrategy
+  Strategy角色：
+  定义所有射击算法的公共接口。
+end note
+
+note bottom of StraightShootStrategy
+  ConcreteStrategy角色：
+  实现具体射击算法（直射、散射、环射）。
+end note
+@enduml
+
