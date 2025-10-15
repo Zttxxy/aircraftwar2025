@@ -34,6 +34,7 @@ public class ImageManager {
     public static BufferedImage HERO_IMAGE;
     public static BufferedImage HERO_BULLET_IMAGE;
     public static BufferedImage ENEMY_BULLET_IMAGE;
+
     public static BufferedImage MOB_ENEMY_IMAGE;
     public static BufferedImage BLOOD_PROP_IMAGE;
     public static BufferedImage FIRE_PROP_IMAGE;
@@ -42,13 +43,20 @@ public class ImageManager {
     public static BufferedImage ELITE_PLUS_IMAGE;
     public static BufferedImage BOSS_IMAGE;
     public static BufferedImage SUPER_FIRE_PROP_IMAGE;
+    public static BufferedImage BACKGROUND_IMAGE_EASY;
+    public static BufferedImage BACKGROUND_IMAGE_COMMON;
+    public static BufferedImage BACKGROUND_IMAGE_DIFFICULT;
 
 
 
-    static {
+   static {
         try {
 
             BACKGROUND_IMAGE = ImageIO.read(new FileInputStream("src/images/bg.jpg"));
+            BACKGROUND_IMAGE_EASY = ImageIO.read(new FileInputStream("src/images/bg2.jpg"));
+            BACKGROUND_IMAGE_COMMON = ImageIO.read(new FileInputStream("src/images/bg3.jpg"));
+            BACKGROUND_IMAGE_DIFFICULT = ImageIO.read(new FileInputStream("src/images/bg5.jpg"));
+
 
             HERO_IMAGE = ImageIO.read(new FileInputStream("src/images/hero.png"));
             MOB_ENEMY_IMAGE = ImageIO.read(new FileInputStream("src/images/mob.png"));
@@ -61,6 +69,9 @@ public class ImageManager {
             ELITE_PLUS_IMAGE = ImageIO.read(new FileInputStream("src/images/elitePlus.png"));
             BOSS_IMAGE = ImageIO.read(new FileInputStream("src/images/boss.png"));
             SUPER_FIRE_PROP_IMAGE =  ImageIO.read(new FileInputStream("src/images/prop_bulletPlus.png"));
+
+
+
 
             CLASSNAME_IMAGE_MAP.put(HeroAircraft.class.getName(), HERO_IMAGE);
             CLASSNAME_IMAGE_MAP.put(MobEnemy.class.getName(), MOB_ENEMY_IMAGE);
