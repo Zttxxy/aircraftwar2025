@@ -5,6 +5,10 @@ import edu.hitsz.strategy.ShootStrategy;
 import edu.hitsz.strategy.NormalFireStrategy;
 
 import java.util.List;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 英雄飞机（单例 + 策略模式）
@@ -30,9 +34,12 @@ public class HeroAircraft extends AbstractAircraft {
     /** 射击策略 */
     private ShootStrategy shootStrategy = new NormalFireStrategy(); // 默认普通火力
 
-
     /** 新增分数属性 */
     private int score = 0;
+
+    // ---------------- 火力增强相关 ----------------
+    private ScheduledExecutorService scheduler;
+    private ScheduledFuture<?> currentTask;
 
 
     /**
@@ -41,6 +48,7 @@ public class HeroAircraft extends AbstractAircraft {
     private HeroAircraft(int locationX, int locationY, int speedX, int speedY, int hp) {
         super(locationX, locationY, speedX, speedY, hp);
         this.maxHp = hp; // 初始化最大血量
+        this.scheduler = Executors.newSingleThreadScheduledExecutor();
     }
 
     /**
@@ -79,6 +87,62 @@ public class HeroAircraft extends AbstractAircraft {
     @Override
     public List<BaseBullet> shoot() {
         return shootStrategy.shoot(this);
+    }
+
+    // ---------------- 火力增强相关方法 ----------------
+
+    /**
+     * 设置临时射击策略
+     * @param strategy 新的射击策略
+     * @param durationMillis 持续时间（毫秒）
+     */
+    public void setTemporaryStrategy(ShootStrategy strategy, long durationMillis) {
+        // 取消之前的任务（如果存在）
+        if (currentTask != null && !currentTask.isDone()) {
+            currentTask.cancel(false);
+        }
+
+        ShootStrategy originalStrategy = this.shootStrategy;
+        this.shootStrategy = strategy;
+
+        System.out.println("设置临时策略: " + strategy.getClass().getSimpleName() +
+                ", 持续时间: " + durationMillis + "ms");
+
+        // 安排恢复原始策略的任务
+        currentTask = scheduler.schedule(() -> {
+            this.shootStrategy = new NormalFireStrategy(); // 总是恢复到普通射击
+            System.out.println("恢复普通射击模式");
+        }, durationMillis, TimeUnit.MILLISECONDS);
+    }
+    /**
+     * 获取当前策略名称（用于UI显示）
+     */
+    public String getCurrentStrategyName() {
+        return shootStrategy.getClass().getSimpleName();
+    }
+
+    /**
+     * 清理资源（游戏结束时调用）
+     */
+    public void cleanup() {
+        if (currentTask != null && !currentTask.isDone()) {
+            currentTask.cancel(false);
+        }
+        if (scheduler != null && !scheduler.isShutdown()) {
+            scheduler.shutdown();
+        }
+    }
+
+    /**
+     * 重置英雄机状态（开始新游戏时调用）
+     */
+    public void reset() {
+        this.shootStrategy = new NormalFireStrategy();
+        this.hp = maxHp;
+        this.score = 0;
+        if (currentTask != null && !currentTask.isDone()) {
+            currentTask.cancel(false);
+        }
     }
 
 
