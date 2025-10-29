@@ -129,8 +129,23 @@ public class ScoreTable {
         returnBotton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                // 保存当前记录
+                String filePath = getFilePathForDifficulty(difficulty);
+                playerDao.saveToFile(filePath);
+
                 // 切换到主菜单
                 Main.cardLayout.show(Main.cardPanel, "menu");
+
+                // 给一点延迟确保UI更新完成
+                Timer timer = new Timer(100, new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent evt) {
+                        // 强制垃圾回收，清理残留对象
+                        System.gc();
+                    }
+                });
+                timer.setRepeats(false);
+                timer.start();
             }
         });
     }

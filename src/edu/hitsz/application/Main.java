@@ -1,5 +1,7 @@
 package edu.hitsz.application;
 
+import edu.hitsz.aircraft.HeroAircraft;
+
 import javax.swing.*;
 import java.awt.*;
 

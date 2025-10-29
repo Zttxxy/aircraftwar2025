@@ -1,5 +1,7 @@
 package edu.hitsz.aircraft;
 
+import edu.hitsz.application.ImageManager;
+import edu.hitsz.application.Main;
 import edu.hitsz.bullet.BaseBullet;
 import edu.hitsz.strategy.ShootStrategy;
 import edu.hitsz.strategy.NormalFireStrategy;
@@ -97,9 +99,20 @@ public class HeroAircraft extends AbstractAircraft {
      * @param durationMillis 持续时间（毫秒）
      */
     public void setTemporaryStrategy(ShootStrategy strategy, long durationMillis) {
+        // 安全检查：确保调度器没有关闭
+        if (scheduler == null || scheduler.isShutdown()) {
+            System.out.println("调度器已关闭，无法设置临时策略");
+            return;
+        }
+
         // 取消之前的任务（如果存在）
         if (currentTask != null && !currentTask.isDone()) {
-            currentTask.cancel(false);
+            currentTask.cancel(true);
+            try {
+                currentTask.get(100, TimeUnit.MILLISECONDS); // 等待任务取消完成
+            } catch (Exception e) {
+                // 忽略取消时的异常
+            }
         }
 
         ShootStrategy originalStrategy = this.shootStrategy;
@@ -109,11 +122,22 @@ public class HeroAircraft extends AbstractAircraft {
                 ", 持续时间: " + durationMillis + "ms");
 
         // 安排恢复原始策略的任务
-        currentTask = scheduler.schedule(() -> {
-            this.shootStrategy = new NormalFireStrategy(); // 总是恢复到普通射击
-            System.out.println("恢复普通射击模式");
-        }, durationMillis, TimeUnit.MILLISECONDS);
+        try {
+            currentTask = scheduler.schedule(() -> {
+                // 再次检查调度器状态和游戏状态
+                if (!scheduler.isShutdown()) {
+                    this.shootStrategy = new NormalFireStrategy();
+                    System.out.println("恢复普通射击模式");
+                }
+            }, durationMillis, TimeUnit.MILLISECONDS);
+        } catch (Exception e) {
+            System.err.println("安排策略恢复任务时出错: " + e.getMessage());
+            // 如果安排任务失败，立即恢复普通模式
+            this.shootStrategy = new NormalFireStrategy();
+        }
     }
+
+
     /**
      * 获取当前策略名称（用于UI显示）
      */
@@ -126,10 +150,18 @@ public class HeroAircraft extends AbstractAircraft {
      */
     public void cleanup() {
         if (currentTask != null && !currentTask.isDone()) {
-            currentTask.cancel(false);
+            currentTask.cancel(true); // 使用 true 确保立即中断
         }
         if (scheduler != null && !scheduler.isShutdown()) {
-            scheduler.shutdown();
+            scheduler.shutdownNow(); // 立即关闭
+            try {
+                if (!scheduler.awaitTermination(500, TimeUnit.MILLISECONDS)) {
+                    System.out.println("Scheduler did not terminate");
+                }
+            } catch (InterruptedException e) {
+                scheduler.shutdownNow();
+                Thread.currentThread().interrupt();
+            }
         }
     }
 
@@ -137,12 +169,25 @@ public class HeroAircraft extends AbstractAircraft {
      * 重置英雄机状态（开始新游戏时调用）
      */
     public void reset() {
+        // 先清理现有任务
+        cleanup();
+
+        // 重新初始化调度器
+        this.scheduler = Executors.newSingleThreadScheduledExecutor();
+
+        // 重置状态
         this.shootStrategy = new NormalFireStrategy();
         this.hp = maxHp;
         this.score = 0;
-        if (currentTask != null && !currentTask.isDone()) {
-            currentTask.cancel(false);
-        }
+        this.shootNum = 1;
+        this.power = 30;
+        this.direction = -1;
+
+        // 重置位置
+        this.setLocation(Main.WINDOW_WIDTH / 2,
+                Main.WINDOW_HEIGHT - ImageManager.HERO_IMAGE.getHeight());
+
+        System.out.println("英雄机状态已重置");
     }
 
 
