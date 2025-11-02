@@ -1,0 +1,140 @@
+@startuml
+
+interface EnemyFactory {
+  + {abstract} createEnemy(int, int, int, int, int): AbstractAircraft
+}
+
+interface PropFactory {
+  + {abstract} createProp(int, int, int, int): AbstractProp
+}
+
+class MobEnemyFactory {
+  + createEnemy(int, int, int, int, int): AbstractAircraft
+}
+
+class EliteEnemyFactory {
+  + createEnemy(int, int, int, int, int): AbstractAircraft
+}
+
+class ElitePlusFactory {
+  + createEnemy(int, int, int, int, int): AbstractAircraft
+}
+
+class BossEnemyFactory {
+  + createEnemy(int, int, int, int, int): AbstractAircraft
+}
+
+class BloodPropFactory {
+  + createProp(int, int, int, int): AbstractProp
+}
+
+class BombPropFactory {
+  + createProp(int, int, int, int): AbstractProp
+}
+
+class FirePropFactory {
+  + createProp(int, int, int, int): AbstractProp
+}
+
+class SuperFirePropFactory {
+  + createProp(int, int, int, int): AbstractProp
+}
+
+' 敌机工厂实现关系
+EnemyFactory <|.. MobEnemyFactory
+EnemyFactory <|.. EliteEnemyFactory
+EnemyFactory <|.. ElitePlusFactory
+EnemyFactory <|.. BossEnemyFactory
+
+' 道具工厂实现关系
+PropFactory <|.. BloodPropFactory
+PropFactory <|.. BombPropFactory
+PropFactory <|.. FirePropFactory
+PropFactory <|.. SuperFirePropFactory
+
+' 产品类
+abstract class AbstractAircraft {
+  # maxHp: int
+  # hp: int
+  + {abstract} shoot(): List<BaseBullet>
+}
+
+class MobEnemy {
+  + forward(): void
+  + shoot(): List<BaseBullet>
+  + onBombExplode(): void
+}
+
+class EliteEnemy {
+  + forward(): void
+  + shoot(): List<BaseBullet>
+  + onBombExplode(): void
+}
+
+class ElitePlus {
+  + shoot(): List<BaseBullet>
+  + onBombExplode(): void
+}
+
+class BossEnemy {
+  + shoot(): List<BaseBullet>
+  + onBombExplode(): void
+}
+
+abstract class AbstractProp {
+  + {abstract} active(HeroAircraft): void
+}
+
+class BloodProp {
+  - addHp: int
+  + active(HeroAircraft): void
+}
+
+class BombProp {
+  - bombSubject: BombSubject
+  + active(HeroAircraft): void
+}
+
+class FireProp {
+  + active(HeroAircraft): void
+}
+
+class SuperFireProp {
+  + active(HeroAircraft): void
+}
+
+' 产品继承关系
+AbstractAircraft <|-- MobEnemy
+AbstractAircraft <|-- EliteEnemy
+AbstractAircraft <|-- ElitePlus
+AbstractAircraft <|-- BossEnemy
+
+AbstractProp <|-- BloodProp
+AbstractProp <|-- BombProp
+AbstractProp <|-- FireProp
+AbstractProp <|-- SuperFireProp
+
+' 工厂创建产品关系
+MobEnemyFactory --> MobEnemy : creates
+EliteEnemyFactory --> EliteEnemy : creates
+ElitePlusFactory --> ElitePlus : creates
+BossEnemyFactory --> BossEnemy : creates
+
+BloodPropFactory --> BloodProp : creates
+BombPropFactory --> BombProp : creates
+FirePropFactory --> FireProp : creates
+SuperFirePropFactory --> SuperFireProp : creates
+
+' 游戏类使用工厂
+class Game {
+  - enemyFactories: List<EnemyFactory>
+  - propFactories: List<PropFactory>
+  + generateEnemies(): void
+  + addRandomEnemy(): void
+  + createPropFromFactory(PropFactory): AbstractProp
+}
+
+Game --> EnemyFactory
+Game --> PropFactory
+
+@enduml

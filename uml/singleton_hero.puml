@@ -1,31 +1,80 @@
 @startuml
-'https://plantuml.com/class-diagram
 
 class HeroAircraft {
-    - {static} instance: HeroAircraft
-    - locationX: int
-    - locationY: int
-    - speedX: int
-    - speedY: int
-    - hp: int
-    - maxHp: int
-    - shootNum: int
-    - power: int
-    - direction: int
-    - isFiring: boolean
-    - isFiringPlus: boolean
+  - {static} volatile instance: HeroAircraft
+  - maxHp: int
+  - hp: int
+  - shootNum: int
+  - power: int
+  - direction: int
+  - shootStrategy: ShootStrategy
+  - score: int
+  - scheduler: ScheduledExecutorService
+  - currentTask: ScheduledFuture<?>
 
-    + HeroAircraft(locationX:int, locationY:int, speedX:int, speedY:int, hp:int)
-    + {static} getInstance(locationX:int, locationY:int, speedX:int, speedY:int, hp:int): HeroAircraft
-    + forward(): void
-    + shoot(): List<BaseBullet>
-    + setHp(hp:int): void
-    + getMaxHp(): int
-    + setFiring(): boolean
-    + closeFiring(): boolean
-    + setFiringPlus(): boolean
-    + closeFiringPlus(): boolean
-    + getDirection(): int
+  - HeroAircraft(int, int, int, int, int)
+  + {static} getInstance(int, int, int, int, int): HeroAircraft
+  + {static} getInstance(): HeroAircraft
+  + forward(): void
+  + shoot(): List<BaseBullet>
+  + setTemporaryStrategy(ShootStrategy, long): void
+  + cleanup(): void
+  + reset(): void
+  + getScore(): int
+  + setScore(int): void
+  + getMaxHp(): int
+  + getShootNum(): int
+  + setShootNum(int): void
+  + getPower(): int
+  + setPower(int): void
+  + getDirection(): int
+  + setDirection(int): void
+  + getShootStrategy(): ShootStrategy
+  + setShootStrategy(ShootStrategy): void
+  + getCurrentStrategyName(): String
 }
+
+abstract class AbstractAircraft {
+  # maxHp: int
+  # hp: int
+
+  + decreaseHp(int): void
+  + increaseHp(int): void
+  + getHp(): int
+  + getMaxHp(): int
+  + {abstract} shoot(): List<BaseBullet>
+}
+
+AbstractAircraft <|-- HeroAircraft
+
+interface ShootStrategy {
+  + {abstract} shoot(HeroAircraft): List<BaseBullet>
+}
+
+class NormalFireStrategy {
+  + shoot(HeroAircraft): List<BaseBullet>
+}
+
+class ScatterFireStrategy {
+  + shoot(HeroAircraft): List<BaseBullet>
+}
+
+class SuperFireStrategy {
+  + shoot(HeroAircraft): List<BaseBullet>
+}
+
+ShootStrategy <|.. NormalFireStrategy
+ShootStrategy <|.. ScatterFireStrategy
+ShootStrategy <|.. SuperFireStrategy
+
+HeroAircraft --> ShootStrategy
+
+note right of HeroAircraft::instance
+单例模式核心：
+- volatile确保可见性
+- 双重检查锁定
+- 私有构造函数
+- 全局访问点
+end note
 
 @enduml

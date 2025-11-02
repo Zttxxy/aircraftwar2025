@@ -1,40 +1,87 @@
 @startuml
-' DAO 模式示例
 
-class Player{
-    - playerId:int
-    - playerName:String
-    - score:int
-    - playTime:String
+class Player {
+  - playerName: String
+  - score: int
+  - playTime: String
 
-    + Player(int playerId, String playerName,int score,String playTime)
-    + getPlayerId():int
-    + setPlayerId(int playerId):void
-    + getPlayerName():String
-    + getScore():int
-    + getPlayTime():String
-    + toString():String
+  + Player(String, int, String)
+  + getPlayerName(): String
+  + getScore(): int
+  + getPlayTime(): String
+  + toString(): String
 }
 
-interface PlayerDao{
-    + getAllPlayers():List<Player>
-    + addPlayer(Player player):void
-    + deletePlayer(int playerId):void
+interface PlayerDao {
+  + {abstract} getAllPlayers(): List<Player>
+  + {abstract} addPlayer(Player): void
+  + {abstract} deletePlayer(String): void
+  + {abstract} deletePlayerByIndex(int): void
+  + {abstract} sortPlayersByScore(): void
+  + {abstract} printRanking(): void
+  + {abstract} saveToFile(String): void
+  + {abstract} loadFromFile(String): void
 }
 
-class PlayerDaoImpl{
-    - players:List<Player>
-    + PlayerDaoImpl()
-    + getAllPlayers():List<Player>
-    + addPlayer(Player player):void
-    + deletePlayer(int playerId):void
-    + sortByScore():List<Player>
-    - saveToFile(String filePath):void
-    - loadFromFile(String filePath):void
-    - getCurrentTime():String
-    - printScores():void
+class PlayerDaoImpl {
+  - players: List<Player>
+  - currentFilePath: String
+
+  + getAllPlayers(): List<Player>
+  + addPlayer(Player): void
+  + deletePlayer(String): void
+  + deletePlayerByIndex(int): void
+  + sortPlayersByScore(): void
+  + printRanking(): void
+  + saveToFile(String): void
+  + loadFromFile(String): void
+  + {static} currentTime(): String
 }
 
-PlayerDaoImpl .up.|> PlayerDao
-PlayerDaoImpl *-- Player
+PlayerDao <|.. PlayerDaoImpl
+
+class ScoreTable {
+  - playerDao: PlayerDao
+  - difficulty: Difficulty
+  - tableModel: DefaultTableModel
+
+  + ScoreTable(Difficulty)
+  - initializeUI(): void
+  - loadRecords(): void
+  - setupListeners(): void
+  - getFilePathForDifficulty(Difficulty): String
+  + getMainPanel(): JPanel
+}
+
+ScoreTable --> PlayerDao
+
+class Game {
+  - difficulty: Difficulty
+  - score: int
+
+  + handleGameOver(): void
+  - getRankingFilePath(Difficulty): String
+}
+
+Game --> PlayerDao
+
+class DaoPatternDemo {
+  + main(String[]): void
+  - currentTime(): String
+}
+
+DaoPatternDemo --> PlayerDaoImpl
+
+' 文件系统关联
+PlayerDaoImpl --> "1" File : uses
+PlayerDaoImpl --> "1" BufferedReader : uses
+PlayerDaoImpl --> "1" PrintWriter : uses
+
+note right of PlayerDaoImpl::saveToFile
+数据持久化实现：
+- 使用文件存储玩家记录
+- 支持不同难度模式的文件分离
+- 自动排序和格式化管理
+end note
+
 @enduml

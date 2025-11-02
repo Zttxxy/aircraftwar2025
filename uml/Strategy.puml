@@ -1,0 +1,82 @@
+@startuml
+
+interface ShootStrategy {
+  + {abstract} shoot(HeroAircraft): List<BaseBullet>
+}
+
+class NormalFireStrategy {
+  + shoot(HeroAircraft): List<BaseBullet>
+}
+
+class ScatterFireStrategy {
+  + shoot(HeroAircraft): List<BaseBullet>
+}
+
+class SuperFireStrategy {
+  + shoot(HeroAircraft): List<BaseBullet>
+}
+
+ShootStrategy <|.. NormalFireStrategy
+ShootStrategy <|.. ScatterFireStrategy
+ShootStrategy <|.. SuperFireStrategy
+
+class HeroAircraft {
+  - {static} volatile instance: HeroAircraft
+  - shootStrategy: ShootStrategy
+  - scheduler: ScheduledExecutorService
+  - currentTask: ScheduledFuture<?>
+
+  + {static} getInstance(int, int, int, int, int): HeroAircraft
+  + {static} getInstance(): HeroAircraft
+  + shoot(): List<BaseBullet>
+  + setTemporaryStrategy(ShootStrategy, long): void
+  + setShootStrategy(ShootStrategy): void
+  + getShootStrategy(): ShootStrategy
+  + getCurrentStrategyName(): String
+  + cleanup(): void
+  + reset(): void
+}
+
+HeroAircraft --> ShootStrategy
+
+class FireProp {
+  + active(HeroAircraft): void
+}
+
+class SuperFireProp {
+  + active(HeroAircraft): void
+}
+
+FireProp --> ScatterFireStrategy : uses
+SuperFireProp --> SuperFireStrategy : uses
+
+class Game {
+  - heroAircraft: HeroAircraft
+  + action(): void
+  + crashCheckAction(): void
+}
+
+Game --> HeroAircraft
+
+' 子弹相关类
+abstract class BaseBullet {
+  - power: int
+  + getPower(): int
+}
+
+class HeroBullet {
+  + HeroBullet(int, int, int, int, int)
+}
+
+BaseBullet <|-- HeroBullet
+
+ShootStrategy --> HeroBullet : creates
+
+note right of HeroAircraft::setTemporaryStrategy
+策略模式核心方法：
+- 设置临时策略并定时恢复
+- 支持动态策略切换
+- 线程安全的策略管理
+end note
+
+@enduml

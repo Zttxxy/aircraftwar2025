@@ -68,11 +68,11 @@ public class StartMenu {
             public void actionPerformed(ActionEvent e) {
                 if (MusicBotton.getText().equals("关")) {
                     MusicBotton.setText("开");
-                    MusicBotton.setBackground(new Color(163, 204, 163)); // 浅绿色
+                    MusicBotton.setBackground(new Color(93, 175, 93)); // 浅绿色
                     ifMusicOn = true;
                 } else {
                     MusicBotton.setText("关");
-                    MusicBotton.setBackground(new Color(230, 176, 170)); // 浅红色
+                    MusicBotton.setBackground(new Color(197, 86, 80)); // 浅红色
                     ifMusicOn = false;
                 }
             }
@@ -132,9 +132,9 @@ public class StartMenu {
         }
 
         // 美化按钮 - 使用浅色系
-        beautifyButton(easyMode, new Color(180, 220, 180));   // 浅绿色
-        beautifyButton(commonMode, new Color(180, 200, 230)); // 浅蓝色
-        beautifyButton(difficultMode, new Color(230, 180, 180)); // 浅红色
+        beautifyButton(easyMode, new Color(109, 184, 113));   // 浅绿色
+        beautifyButton(commonMode, new Color(107, 157, 202)); // 浅蓝色
+        beautifyButton(difficultMode, new Color(197, 86, 80)); // 浅红色
 
         // 美化音乐按钮
         beautifyMusicButton(MusicBotton);
@@ -187,9 +187,9 @@ public class StartMenu {
 
         // 根据当前状态设置颜色
         if (button.getText().equals("开")) {
-            button.setBackground(new Color(163, 204, 163)); // 浅绿色
+            button.setBackground(new Color(93, 175, 93)); // 浅绿色
         } else {
-            button.setBackground(new Color(230, 176, 170)); // 浅红色
+            button.setBackground(new Color(197, 86, 80)); // 浅红色
         }
 
         // 设置按钮大小
@@ -211,9 +211,9 @@ public class StartMenu {
 
             public void mouseExited(java.awt.event.MouseEvent evt) {
                 if (button.getText().equals("开")) {
-                    button.setBackground(new Color(163, 204, 163));
+                    button.setBackground(new Color(93, 175, 93));
                 } else {
-                    button.setBackground(new Color(230, 176, 170));
+                    button.setBackground(new Color(197, 86, 80));
                 }
             }
         });

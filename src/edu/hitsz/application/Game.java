@@ -85,7 +85,7 @@ public abstract class Game extends JPanel {
         heroAircraft = HeroAircraft.getInstance(
                 Main.WINDOW_WIDTH / 2,
                 Main.WINDOW_HEIGHT - ImageManager.HERO_IMAGE.getHeight(),
-                0, 0, 1000);
+                0, 0, 5000);
 
         enemyAircrafts = new LinkedList<>();
         heroBullets = new LinkedList<>();

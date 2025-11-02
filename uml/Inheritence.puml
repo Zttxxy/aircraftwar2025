@@ -1,5 +1,8 @@
 @startuml
-'https://plantuml.com/class-diagram
+
+interface BombObserver {
+  + onBombExplode(): void
+}
 
 abstract class AbstractFlyingObject {
   # locationX: int
@@ -11,14 +14,11 @@ abstract class AbstractFlyingObject {
   # height: int
   # isValid: boolean
 
-  + AbstractFlyingObject()
-  + AbstractFlyingObject(int, int, int, int)
   + forward(): void
   + crash(AbstractFlyingObject): boolean
   + getLocationX(): int
   + getLocationY(): int
   + setLocation(double, double): void
-  + getSpeedY(): int
   + getImage(): BufferedImage
   + getWidth(): int
   + getHeight(): int
@@ -30,47 +30,94 @@ abstract class AbstractAircraft {
   # maxHp: int
   # hp: int
 
-  + AbstractAircraft(int, int, int, int, int)
   + decreaseHp(int): void
+  + increaseHp(int): void
   + getHp(): int
-  + {abstract} shoot(): List<BaseBullet>
-}
-
-class HeroAircraft {
-  - shootNum: int
-  - power: int
-  - direction: int
-
-  + HeroAircraft(int, int, int, int, int)
-  + forward(): void
-  + shoot(): List<BaseBullet>
-  + setHp(int): void
   + getMaxHp(): int
-}
-
-class EliteEnemy {
-  - shootNum: int
-  - power: int
-  - direction: int
-
-  + EliteEnemy(int, int, int, int, int)
-  + forward(): void
-  + shoot(): List<BaseBullet>
-}
-
-class MobEnemy {
-  + MobEnemy(int, int, int, int, int)
-  + forward(): void
-  + shoot(): List<BaseBullet>
+  + {abstract} shoot(): List<BaseBullet>
 }
 
 abstract class BaseBullet {
   - power: int
 
-  + BaseBullet(int, int, int, int, int)
   + forward(): void
   + getPower(): int
 }
+
+abstract class AbstractProp {
+  + {abstract} active(HeroAircraft): void
+  + active(HeroAircraft, List<AbstractAircraft>, List<BaseBullet>): void
+}
+
+' 飞机类继承关系
+AbstractFlyingObject <|-- AbstractAircraft
+
+class HeroAircraft {
+  - {static} volatile instance: HeroAircraft
+  - maxHp: int
+  - shootNum: int
+  - power: int
+  - direction: int
+  - shootStrategy: ShootStrategy
+  - score: int
+  - scheduler: ScheduledExecutorService
+  - currentTask: ScheduledFuture<?>
+
+  - HeroAircraft(int, int, int, int, int)
+  + {static} getInstance(int, int, int, int, int): HeroAircraft
+  + {static} getInstance(): HeroAircraft
+  + forward(): void
+  + shoot(): List<BaseBullet>
+  + setTemporaryStrategy(ShootStrategy, long): void
+  + cleanup(): void
+  + reset(): void
+  + getScore(): int
+  + setScore(int): void
+  + getCurrentStrategyName(): String
+}
+
+class MobEnemy {
+  + forward(): void
+  + shoot(): List<BaseBullet>
+  + onBombExplode(): void
+}
+
+class EliteEnemy {
+  - {static} SHOOT_NUM: int
+  - {static} POWER: int
+  - {static} DIRECTION: int
+
+  + forward(): void
+  + shoot(): List<BaseBullet>
+  + onBombExplode(): void
+}
+
+class ElitePlus {
+  - power: int
+  - direction: int
+  - shootNum: int
+
+  + shoot(): List<BaseBullet>
+  + onBombExplode(): void
+}
+
+class BossEnemy {
+  - shootNum: int
+  - power: int
+  - direction: int
+
+  + shoot(): List<BaseBullet>
+  + onBombExplode(): void
+}
+
+AbstractAircraft <|-- HeroAircraft
+AbstractAircraft <|-- MobEnemy
+AbstractAircraft <|-- EliteEnemy
+AbstractAircraft <|-- ElitePlus
+AbstractAircraft <|-- BossEnemy
+
+' 子弹类继承关系
+AbstractFlyingObject <|-- BaseBullet
 
 class HeroBullet {
   + HeroBullet(int, int, int, int, int)
@@ -78,52 +125,50 @@ class HeroBullet {
 
 class EnemyBullet {
   + EnemyBullet(int, int, int, int, int)
+  + onBombExplode(): void
 }
-
-abstract class AbstractProp {
-  + AbstractProp(int, int, int, int)
-  + {abstract} active(HeroAircraft): void
-}
-
-class BloodProp {
-  - addHp: int
-
-  + BloodProp(int, int, int, int)
-  + active(HeroAircraft): void
-}
-
-class BombProp {
-  + BombProp(int, int, int, int)
-  + active(HeroAircraft): void
-}
-
-class FireProp {
-  + FireProp(int, int, int, int)
-  + active(HeroAircraft): void
-}
-
-' 继承关系
-AbstractFlyingObject <|-- AbstractAircraft
-AbstractFlyingObject <|-- BaseBullet
-AbstractFlyingObject <|-- AbstractProp
-
-AbstractAircraft <|-- HeroAircraft
-AbstractAircraft <|-- EliteEnemy
-AbstractAircraft <|-- MobEnemy
 
 BaseBullet <|-- HeroBullet
 BaseBullet <|-- EnemyBullet
 
+' 道具类继承关系
+AbstractFlyingObject <|-- AbstractProp
+
+class BloodProp {
+  - addHp: int
+
+  + active(HeroAircraft): void
+}
+
+class BombProp {
+  - bombSubject: BombSubject
+
+  + attachObserver(BombObserver): void
+  + detachObserver(BombObserver): void
+  + active(HeroAircraft): void
+}
+
+class FireProp {
+  + active(HeroAircraft): void
+}
+
+class SuperFireProp {
+  - {static} SUPER_FIRE_DURATION: int
+
+  + active(HeroAircraft): void
+  + getImage(): BufferedImage
+}
+
 AbstractProp <|-- BloodProp
 AbstractProp <|-- BombProp
 AbstractProp <|-- FireProp
+AbstractProp <|-- SuperFireProp
 
-' 关联关系
-AbstractAircraft --> "0..*" BaseBullet : shoot()
-AbstractProp --> HeroAircraft : active()
-
-' 依赖关系
-HeroAircraft ..> HeroBullet : creates
-EliteEnemy ..> EnemyBullet : creates
+' 接口实现关系
+BombObserver <|.. MobEnemy
+BombObserver <|.. EliteEnemy
+BombObserver <|.. ElitePlus
+BombObserver <|.. BossEnemy
+BombObserver <|.. EnemyBullet
 
 @enduml

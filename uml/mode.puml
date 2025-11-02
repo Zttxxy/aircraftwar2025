@@ -1,0 +1,87 @@
+@startuml
+
+abstract class Game {
+  # mobEnemyHp: int
+  # eliteEnemyHp: int
+  # elitePlusHp: int
+  # bossEnemyHp: int
+  # eliteEnemyProbability: double
+  # elitePlusProbability: double
+  # enemySpeedBonus: int
+  # cycleTimeReduction: int
+  # difficulty: Difficulty
+
+  # {abstract} initializeDifficulty(): void
+  # increaseDifficulty(): void
+  # generateEnemies(): void
+  # generateBossEnemy(): void
+  # {abstract} getBossEnemyHp(): int
+  + action(): void
+  + handleGameOver(): void
+}
+
+class EasyGame {
+  + initializeDifficulty(): void
+  + increaseDifficulty(): void
+  + generateEnemies(): void
+  + getBossEnemyHp(): int
+}
+
+class CommonGame {
+  - difficultyIncreaseCount: int
+
+  + initializeDifficulty(): void
+  + increaseDifficulty(): void
+  + getBossEnemyHp(): int
+}
+
+class DifficultGame {
+  - difficultyIncreaseCount: int
+  - bossAppearanceCount: int
+
+  + initializeDifficulty(): void
+  + increaseDifficulty(): void
+  + generateBossEnemy(): void
+  + getBossEnemyHp(): int
+}
+
+Game <|-- EasyGame
+Game <|-- CommonGame
+Game <|-- DifficultGame
+
+' 难度枚举
+enum Difficulty {
+  EASY
+  NORMAL
+  HARD
+}
+
+Game --> Difficulty
+
+' 游戏启动相关
+class StartMenu {
+  - OnStartListener listener
+  + setOnStartListener(OnStartListener): void
+}
+
+interface OnStartListener {
+  + {abstract} onStart(Difficulty, boolean): void
+}
+
+StartMenu --> OnStartListener
+OnStartListener --> Game
+
+class Main {
+  + {static} main(String[]): void
+}
+
+Main --> StartMenu
+
+note right of Game::initializeDifficulty
+模板模式核心：
+- 抽象方法：各难度必须实现
+- 具体方法：通用游戏逻辑
+- 钩子方法：各难度可选重写
+end note
+
+@enduml

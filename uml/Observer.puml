@@ -1,0 +1,79 @@
+@startuml
+
+interface BombObserver {
+  + {abstract} onBombExplode(): void
+}
+
+class BombSubject {
+  - observers: List<BombObserver>
+
+  + attach(BombObserver): void
+  + detach(BombObserver): void
+  + notifyAllObservers(): void
+  + getObserverCount(): int
+}
+
+BombSubject --> "1" BombObserver
+
+class BombProp {
+  - bombSubject: BombSubject
+
+  + attachObserver(BombObserver): void
+  + detachObserver(BombObserver): void
+  + active(HeroAircraft): void
+}
+
+BombProp --> BombSubject
+
+' 具体观察者实现
+class MobEnemy {
+  + onBombExplode(): void
+}
+
+class EliteEnemy {
+  + onBombExplode(): void
+}
+
+class ElitePlus {
+  + onBombExplode(): void
+}
+
+class BossEnemy {
+  + onBombExplode(): void
+}
+
+class EnemyBullet {
+  + onBombExplode(): void
+}
+
+BombObserver <|.. MobEnemy
+BombObserver <|.. EliteEnemy
+BombObserver <|.. ElitePlus
+BombObserver <|.. BossEnemy
+BombObserver <|.. EnemyBullet
+
+' 游戏中的注册逻辑
+class Game {
+  - enemyAircrafts: List<AbstractAircraft>
+  - enemyBullets: List<BaseBullet>
+  - props: List<AbstractProp>
+
+  + crashCheckAction(): void
+  - registerBombObservers(BombProp): void
+}
+
+Game --> BombProp
+Game --> MobEnemy
+Game --> EliteEnemy
+Game --> ElitePlus
+Game --> BossEnemy
+Game --> EnemyBullet
+
+note right of BombProp::active
+观察者模式核心：
+- 炸弹激活时通知所有观察者
+- 不同观察者有不同的反应逻辑
+- 支持动态注册和移除
+end note
+
+@enduml
